@@ -36,6 +36,9 @@ interface GameStore extends GameState {
   addCombatLog: (message: string, type: 'player' | 'monster' | 'system') => void;
   clearDeadMonsters: () => void;
   advanceFloor: () => void;
+  manualAdvanceFloor: () => void;
+  respawnMonsters: () => void;
+  setAutoAdvanceFloor: (value: boolean) => void;
   respawnPlayer: () => void;
   updateSkillCooldowns: () => void;
   useSkill: (skillId: string) => void;
@@ -80,6 +83,7 @@ export const useGameStore = create<GameStore>()(
       damageNumbers: [],
       isPaused: false,
       isGameOver: false,
+      autoAdvanceFloor: true,
 
       initializeGame: () => {
         const player = createInitialPlayer();
@@ -261,7 +265,10 @@ export const useGameStore = create<GameStore>()(
 
         if (newHp <= 0) {
           set({ isGameOver: true });
-          get().addCombatLog(`${player.name} 倒下了！从第 ${get().tower.currentFloor} 层重新开始...`, 'system');
+          get().addCombatLog(`${player.name} 倒下了！重新生成怪物...`, 'system');
+          setTimeout(() => {
+            get().respawnMonsters();
+          }, 500);
         }
       },
 
@@ -309,7 +316,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       clearDeadMonsters: () => {
-        const { monsters, tower } = get();
+        const { monsters, tower, autoAdvanceFloor } = get();
         const aliveMonsters = monsters.filter(m => !m.isDead);
 
         if (aliveMonsters.length === 0) {
@@ -317,10 +324,13 @@ export const useGameStore = create<GameStore>()(
           get().addGold(reward.gold);
           get().addExp(reward.exp);
           get().addCombatLog(`通关第 ${tower.currentFloor} 层！获得 ${reward.gold} 金币，${reward.exp} 经验！`, 'system');
-          get().advanceFloor();
+          
+          if (autoAdvanceFloor) {
+            get().advanceFloor();
+          } else {
+            get().respawnMonsters();
+          }
         }
-
-        set({ monsters: monsters.filter(m => !m.isDead) || [] });
       },
 
       advanceFloor: () => {
@@ -336,6 +346,33 @@ export const useGameStore = create<GameStore>()(
         get().spawnMonsters();
       },
 
+      manualAdvanceFloor: () => {
+        const { tower, autoAdvanceFloor } = get();
+        if (autoAdvanceFloor) return;
+        
+        const newFloor = tower.currentFloor + 1;
+        set({
+          tower: {
+            ...tower,
+            currentFloor: newFloor,
+            maxFloor: Math.max(tower.maxFloor, newFloor),
+          },
+        });
+        get().spawnMonsters();
+        get().addCombatLog(`手动升层至第 ${newFloor} 层！`, 'system');
+      },
+
+      respawnMonsters: () => {
+        set({ isGameOver: false });
+        get().spawnMonsters();
+        get().addCombatLog(`重新生成第 ${get().tower.currentFloor} 层怪物！`, 'system');
+      },
+
+      setAutoAdvanceFloor: (value: boolean) => {
+        set({ autoAdvanceFloor: value });
+        get().addCombatLog(`自动升层：${value ? '开启' : '关闭'}`, 'system');
+      },
+
       respawnPlayer: () => {
         const { player, tower } = get();
         const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
@@ -348,13 +385,9 @@ export const useGameStore = create<GameStore>()(
             maxMp: computedStats.maxMp,
           },
           isGameOver: false,
-          tower: {
-            ...tower,
-            currentFloor: Math.max(1, tower.currentFloor - 5),
-          },
         });
-        get().spawnMonsters();
-        get().addCombatLog(`重新开始，从第 ${Math.max(1, tower.currentFloor - 5)} 层挑战！`, 'system');
+        get().respawnMonsters();
+        get().addCombatLog(`恢复满血，重新挑战第 ${tower.currentFloor} 层！`, 'system');
       },
 
       updateSkillCooldowns: () => {
@@ -414,6 +447,12 @@ export const useGameStore = create<GameStore>()(
         const { isPaused, isGameOver, monsters } = get();
         if (isPaused || isGameOver) return;
 
+        const allDead = monsters.length > 0 && monsters.every(m => m.isDead);
+        if (allDead) {
+          get().clearDeadMonsters();
+          return;
+        }
+
         get().playerAttack();
         get().clearDeadMonsters();
 
@@ -435,6 +474,7 @@ export const useGameStore = create<GameStore>()(
       partialize: (state) => ({
         player: state.player,
         tower: state.tower,
+        autoAdvanceFloor: state.autoAdvanceFloor,
       }),
     }
   )

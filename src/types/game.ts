@@ -98,6 +98,7 @@ export interface GameState {
   damageNumbers: DamageNumber[];
   isPaused: boolean;
   isGameOver: boolean;
+  autoAdvanceFloor: boolean;
 }
 
 export interface SaveData {

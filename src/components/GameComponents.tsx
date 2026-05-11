@@ -1,24 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { calculateComputedStats } from '../utils/gameLogic';
-import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X } from 'lucide-react';
+import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X, ChevronUp, ToggleLeft, ToggleRight } from 'lucide-react';
 import { BaseStats, ComputedStats, Entity } from '../types/game';
 
 export const GameHeader: React.FC = () => {
-  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer } = useGameStore();
+  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer, autoAdvanceFloor, setAutoAdvanceFloor, manualAdvanceFloor } = useGameStore();
 
   return (
     <div className="bg-gradient-to-b from-purple-900/50 to-transparent p-3 border-b border-purple-500/20">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
             第 {tower.currentFloor} 层
           </div>
           <div className="text-xs text-gray-400">
-            历史最高: {tower.maxFloor} 层
+            历史: {tower.maxFloor}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setAutoAdvanceFloor(!autoAdvanceFloor)}
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+              autoAdvanceFloor ? 'bg-green-600/50 text-green-400' : 'bg-gray-700/50 text-gray-400'
+            }`}
+          >
+            {autoAdvanceFloor ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+            自动
+          </button>
+          <button
+            onClick={manualAdvanceFloor}
+            disabled={autoAdvanceFloor}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-600/50 hover:bg-blue-600 disabled:bg-gray-700/50 disabled:text-gray-500 transition-colors"
+          >
+            <ChevronUp className="w-4 h-4" />
+            升层
+          </button>
           <button
             onClick={togglePause}
             className="p-2 rounded-lg bg-purple-800/50 hover:bg-purple-700/50 transition-colors"
@@ -434,17 +451,16 @@ export const GameOverOverlay: React.FC = () => {
   if (!isGameOver) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="text-center">
-        <div className="text-5xl mb-3">💀</div>
-        <h2 className="text-3xl font-bold text-red-500 mb-3">你已阵亡</h2>
-        <p className="text-gray-400 mb-1">挑战至第 {tower.currentFloor} 层</p>
-        <p className="text-yellow-400 mb-4">历史最高: {tower.maxFloor} 层</p>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="text-center bg-gray-900/90 rounded-xl p-6 border border-red-500/50">
+        <div className="text-4xl mb-2">💀</div>
+        <h2 className="text-2xl font-bold text-red-500 mb-2">阵亡</h2>
+        <p className="text-gray-400 text-sm mb-3">第 {tower.currentFloor} 层</p>
         <button
           onClick={respawnPlayer}
-          className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-xl font-bold transition-all transform hover:scale-105"
+          className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-lg font-bold transition-all"
         >
-          重生挑战
+          满血复活
         </button>
       </div>
     </div>
