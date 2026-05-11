@@ -156,22 +156,22 @@ export const MonsterCard: React.FC<{ monster: any; index: number }> = ({ monster
 
   return (
     <div
-      className={`bg-gray-900/80 rounded-xl p-4 border transition-all duration-300 ${
-        isBoss ? 'border-red-500 shadow-lg shadow-red-500/20' :
-        isElite ? 'border-orange-500 shadow-lg shadow-orange-500/20' :
-        'border-gray-600/50'
-      } ${monster.isDead ? 'opacity-50 grayscale' : ''}`}
+      className={`rounded-lg p-2 transition-all duration-300 ${
+        isBoss ? 'bg-gradient-to-r from-red-900/50 to-red-800/30 border border-red-500/50' :
+        isElite ? 'bg-gradient-to-r from-orange-900/50 to-orange-800/30 border border-orange-500/50' :
+        'bg-gray-900/80 border border-gray-700/50'
+      } ${monster.isDead ? 'opacity-30 grayscale' : ''}`}
     >
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${
           isBoss ? 'bg-gradient-to-br from-red-600 to-red-800' :
           isElite ? 'bg-gradient-to-br from-orange-600 to-orange-800' :
           'bg-gradient-to-br from-gray-600 to-gray-700'
         }`}>
           {isBoss ? '👹' : isElite ? '💀' : '👤'}
         </div>
-        <div className="flex-1">
-          <div className={`font-bold text-sm ${
+        <div className="flex-1 min-w-0">
+          <div className={`font-bold text-xs truncate ${
             isBoss ? 'text-red-400' : isElite ? 'text-orange-400' : 'text-gray-300'
           }`}>
             {monster.name}
@@ -204,17 +204,18 @@ export const MonsterArea: React.FC = () => {
   const { monsters } = useGameStore();
 
   return (
-    <div className="bg-gradient-to-b from-red-900/20 to-transparent p-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="grid grid-cols-5 gap-2">
-          {[0, 1, 2, 3, 4].map(index => (
-            <MonsterCard
-              key={monsters[index]?.id || index}
-              monster={monsters[index] || { isDead: true, name: '空位', hp: 0, maxHp: 1, level: 0 }}
-              index={index}
-            />
-          ))}
-        </div>
+    <div className="space-y-3">
+      <div className="text-center mb-4">
+        <h3 className="text-lg font-bold text-red-400">敌人区域</h3>
+      </div>
+      <div className="space-y-2">
+        {[0, 1, 2, 3, 4].map(index => (
+          <MonsterCard
+            key={monsters[index]?.id || index}
+            monster={monsters[index] || { isDead: true, name: '空位', hp: 0, maxHp: 1, level: 0 }}
+            index={index}
+          />
+        ))}
       </div>
     </div>
   );
