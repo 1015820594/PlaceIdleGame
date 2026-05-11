@@ -132,23 +132,20 @@ export default function Home() {
       <div className="relative z-10 flex flex-col h-screen">
         <GameHeader />
 
-        <div className="flex-1 flex overflow-hidden">
-          <div className="w-1/3 h-full flex items-center justify-center p-2 border-r border-gray-800/50">
-            <PlayerCard onClick={handlePlayerClick} />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex flex-1 overflow-hidden">
+            <div className="w-1/3 p-2 border-r border-gray-800/50 flex items-center justify-center">
+              <PlayerCard onClick={handlePlayerClick} />
+            </div>
+
+            <div className="w-2/3 p-2 flex items-center">
+              <div className="w-full" onClick={handleMonsterClick}>
+                <MonsterArea onMonsterClick={handleMonsterClick} />
+              </div>
+            </div>
           </div>
 
-          <div className="w-2/3 h-full flex flex-col p-2">
-            <div 
-              className="flex-1 flex flex-col justify-center overflow-hidden"
-              onClick={handleMonsterClick}
-            >
-              <MonsterArea onMonsterClick={handleMonsterClick} />
-            </div>
-            
-            <div className="flex-shrink-0">
-              <CombatLog />
-            </div>
-          </div>
+          <CombatLog />
         </div>
 
         <SkillBar />

@@ -398,11 +398,11 @@ export const CombatLog: React.FC = () => {
   }, [combatLogs]);
 
   return (
-    <div className="bg-gray-900/80 p-2 border-t border-gray-700/50">
+    <div className="bg-gray-900/80 px-3 py-2 border-t border-gray-700/50 w-full">
       <div className="text-xs text-gray-400 mb-1">战斗日志</div>
       <div
         ref={scrollRef}
-        className="h-32 overflow-y-auto text-xs space-y-0.5 scrollbar-thin scrollbar-thumb-gray-600"
+        className="h-40 overflow-y-auto text-xs space-y-0.5 scrollbar-thin scrollbar-thumb-gray-600"
       >
         {combatLogs.map(log => (
           <div
