@@ -484,14 +484,15 @@ const useGameStore = create<GameStore>()(
           return;
         }
 
-        const aliveMonsters = monsters.filter(m => !m.isDead);
-        if (aliveMonsters.length === 0) return;
-
-        const target = aliveMonsters[Math.floor(Math.random() * aliveMonsters.length)];
         const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
-        const playerEntity = { id: 'player', name: player.name, level: player.level, hp: player.hp, maxHp: player.maxHp, mp: player.mp, maxMp: player.maxMp, baseStats: player.baseStats, computedStats, skills: player.skills, isPlayer: true, isDead: false };
 
         if (skill.type === 'damage') {
+          const aliveMonsters = monsters.filter(m => !m.isDead);
+          if (aliveMonsters.length === 0) return;
+
+          const target = aliveMonsters[Math.floor(Math.random() * aliveMonsters.length)];
+          const playerEntity = { id: 'player', name: player.name, level: player.level, hp: player.hp, maxHp: player.maxHp, mp: player.mp, maxMp: player.maxMp, baseStats: player.baseStats, computedStats, skills: player.skills, isPlayer: true, isDead: false };
+          
           const { damage } = calculateDamage(
             playerEntity,
             target,
@@ -503,13 +504,14 @@ const useGameStore = create<GameStore>()(
         } else if (skill.type === 'heal') {
           const healAmount = Math.floor(computedStats.maxHp * skill.healAmount);
           const newHp = Math.min(computedStats.maxHp, player.hp + healAmount);
+          const actualHeal = newHp - player.hp;
           set({
             player: {
               ...player,
               hp: newHp,
             },
           });
-          get().addCombatLog(`${player.name} 使用了 ${skill.name}！恢复了 ${healAmount} 点生命！`, 'player');
+          get().addCombatLog(`${player.name} 使用了 ${skill.name}！恢复了 ${actualHeal} 点生命！`, 'player');
         } else if (skill.type === 'defense') {
           get().addCombatLog(`${player.name} 使用了 ${skill.name}！3秒内减伤50%！`, 'player');
         }
