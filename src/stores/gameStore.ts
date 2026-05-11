@@ -36,6 +36,7 @@ interface GameStore extends GameState {
   addCombatLog: (message: string, type: 'player' | 'monster' | 'system') => void;
   clearDeadMonsters: () => void;
   advanceFloor: () => void;
+  descendFloor: () => void;
   manualAdvanceFloor: () => void;
   respawnMonsters: () => void;
   setAutoAdvanceFloor: (value: boolean) => void;
@@ -361,6 +362,21 @@ export const useGameStore = create<GameStore>()(
         });
         get().spawnMonsters();
         get().addCombatLog(`手动升层至第 ${newFloor} 层！`, 'system');
+      },
+
+      descendFloor: () => {
+        const { tower } = get();
+        if (tower.currentFloor <= 1) return;
+        
+        const newFloor = tower.currentFloor - 1;
+        set({
+          tower: {
+            ...tower,
+            currentFloor: newFloor,
+          },
+        });
+        get().spawnMonsters();
+        get().addCombatLog(`降层至第 ${newFloor} 层！`, 'system');
       },
 
       respawnMonsters: () => {

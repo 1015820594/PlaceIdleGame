@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { calculateComputedStats } from '../utils/gameLogic';
-import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X, ChevronUp, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X, ChevronUp, ChevronDown, ToggleLeft, ToggleRight } from 'lucide-react';
 import { BaseStats, ComputedStats, Entity } from '../types/game';
 
 export const GameHeader: React.FC = () => {
-  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer, autoAdvanceFloor, setAutoAdvanceFloor, manualAdvanceFloor } = useGameStore();
+  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer, autoAdvanceFloor, setAutoAdvanceFloor, manualAdvanceFloor, descendFloor } = useGameStore();
 
   return (
     <div className="bg-gradient-to-b from-purple-900/50 to-transparent p-3 border-b border-purple-500/20">
@@ -19,6 +19,14 @@ export const GameHeader: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={descendFloor}
+            disabled={tower.currentFloor <= 1}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-orange-600/50 hover:bg-orange-600 disabled:bg-gray-700/50 disabled:text-gray-500 transition-colors"
+          >
+            <ChevronDown className="w-4 h-4" />
+            降层
+          </button>
           <button
             onClick={() => setAutoAdvanceFloor(!autoAdvanceFloor)}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
@@ -48,7 +56,7 @@ export const GameHeader: React.FC = () => {
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 transition-colors text-sm"
             >
               <RotateCcw className="w-3 h-3" />
-              重生
+              复活
             </button>
           )}
         </div>
