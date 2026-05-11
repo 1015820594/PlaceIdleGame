@@ -45,6 +45,8 @@ interface GameStore extends GameState {
   useSkill: (skillId: string) => void;
   nextTurn: () => void;
   togglePause: () => void;
+  setGameSpeed: (speed: number) => void;
+  toggleSettings: () => void;
 }
 
 const createInitialPlayer = (): PlayerData => {
@@ -85,6 +87,8 @@ const useGameStore = create<GameStore>()(
       isPaused: false,
       isGameOver: false,
       autoAdvanceFloor: true,
+      gameSpeed: 1,
+      showSettings: false,
 
       initializeGame: () => {
         const state = get();
@@ -261,8 +265,8 @@ const useGameStore = create<GameStore>()(
         get().addDamageNumber({
           id: generateId(),
           value: damage,
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
+          x: window.innerWidth * 0.15,
+          y: window.innerHeight * 0.3,
           type: 'physical',
           isCrit,
         });
@@ -296,8 +300,8 @@ const useGameStore = create<GameStore>()(
         get().addDamageNumber({
           id: generateId(),
           value: damage,
-          x: 100 + Math.random() * 200,
-          y: 150 + Math.random() * 100,
+          x: window.innerWidth * 0.5 + Math.random() * 200,
+          y: window.innerHeight * 0.3 + Math.random() * 100,
           type: attacker.computedStats.physicalAttack > attacker.computedStats.magicalAttack ? 'physical' : 'magical',
           isCrit: false,
         });
@@ -493,6 +497,14 @@ const useGameStore = create<GameStore>()(
       togglePause: () => {
         set({ isPaused: !get().isPaused });
       },
+
+      setGameSpeed: (speed: number) => {
+        set({ gameSpeed: speed });
+      },
+
+      toggleSettings: () => {
+        set({ showSettings: !get().showSettings });
+      },
     }),
     {
       name: 'tianlong-game-storage',
@@ -500,6 +512,7 @@ const useGameStore = create<GameStore>()(
         player: state.player,
         tower: state.tower,
         autoAdvanceFloor: state.autoAdvanceFloor,
+        gameSpeed: state.gameSpeed,
       }),
     }
   )

@@ -99,6 +99,8 @@ export interface GameState {
   isPaused: boolean;
   isGameOver: boolean;
   autoAdvanceFloor: boolean;
+  gameSpeed: number;
+  showSettings: boolean;
 }
 
 export interface SaveData {

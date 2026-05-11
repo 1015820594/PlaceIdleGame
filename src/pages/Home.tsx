@@ -9,6 +9,7 @@ import {
   DamageNumbers,
   GameOverOverlay,
   EntityDetailModal,
+  SettingsPanel,
 } from '@/components/GameComponents';
 import { Entity } from '@/types/game';
 
@@ -33,6 +34,7 @@ export default function Home() {
     isPaused,
     isGameOver,
     addAttributePoint,
+    gameSpeed,
   } = useGameStore();
 
   const [isInitialized, setIsInitialized] = useState(false);
@@ -65,7 +67,7 @@ export default function Home() {
   useEffect(() => {
     if (!isInitialized || isPaused || isGameOver) return;
 
-    const tickRate = 1500;
+    const tickRate = 1500 / gameSpeed;
 
     const gameLoop = (timestamp: number) => {
       if (timestamp - lastTickRef.current >= tickRate) {
@@ -82,7 +84,7 @@ export default function Home() {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [isInitialized, isPaused, isGameOver, nextTurn]);
+  }, [isInitialized, isPaused, isGameOver, nextTurn, gameSpeed]);
 
   const handlePlayerClick = () => {
     const { player } = useGameStore.getState();
@@ -195,6 +197,7 @@ export default function Home() {
         onAddPoint={addAttributePoint}
       />
 
+      <SettingsPanel />
       <DamageNumbers />
       <GameOverOverlay />
     </div>

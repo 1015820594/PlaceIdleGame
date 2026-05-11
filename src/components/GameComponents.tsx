@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { calculateComputedStats } from '../utils/gameLogic';
-import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X, ChevronUp, ChevronDown, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Play, Pause, RotateCcw, Zap, Shield, Heart, Sword, X, ChevronUp, ChevronDown, ToggleLeft, ToggleRight, Settings } from 'lucide-react';
 import { BaseStats, ComputedStats, Entity } from '../types/game';
 
 export const GameHeader: React.FC = () => {
-  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer, autoAdvanceFloor, setAutoAdvanceFloor, manualAdvanceFloor, descendFloor } = useGameStore();
+  const { tower, player, isPaused, togglePause, isGameOver, respawnPlayer, autoAdvanceFloor, setAutoAdvanceFloor, manualAdvanceFloor, descendFloor, toggleSettings } = useGameStore();
 
   return (
     <div className="bg-gradient-to-b from-purple-900/50 to-transparent p-3 border-b border-purple-500/20">
@@ -19,6 +19,12 @@ export const GameHeader: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={toggleSettings}
+            className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
           <button
             onClick={descendFloor}
             disabled={tower.currentFloor <= 1}
@@ -74,6 +80,44 @@ export const GameHeader: React.FC = () => {
         <div className="flex items-center gap-1">
           <span className="text-gray-400">属性点:</span>
           <span className="text-green-400 font-bold">{player.attributePoints}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const SettingsPanel: React.FC = () => {
+  const { showSettings, toggleSettings, gameSpeed, setGameSpeed } = useGameStore();
+
+  if (!showSettings) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={toggleSettings}>
+      <div className="bg-gray-900 rounded-xl p-4 w-full max-w-sm mx-4 border border-gray-600" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-white">设置</h2>
+          <button onClick={toggleSettings} className="p-1 hover:bg-gray-800 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="text-sm font-bold text-gray-400 mb-2">游戏倍速</h3>
+          <div className="flex gap-2">
+            {[1, 2, 3].map(speed => (
+              <button
+                key={speed}
+                onClick={() => setGameSpeed(speed)}
+                className={`flex-1 py-2 rounded-lg font-bold text-sm transition-colors ${
+                  gameSpeed === speed
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                }`}
+              >
+                {speed}倍
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
