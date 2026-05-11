@@ -44,7 +44,7 @@ interface GameStore extends GameState {
 }
 
 const createInitialPlayer = (): PlayerData => {
-  const baseStats: BaseStats = { str: 10, int: 10, vit: 10, def: 10, agi: 10 };
+  const baseStats: BaseStats = { str: 100, int: 100, vit: 100, def: 100, agi: 50 };
   const computedStats = calculateComputedStats(baseStats);
   
   return {
