@@ -97,11 +97,20 @@ export default function Home() {
   };
 
   const handleMonsterClick = (monster: any) => {
+    if (!monster || !monster.id) return;
+    
     const monsterEntity: Entity = {
-      ...monster,
-      computedStats: {
+      id: monster.id,
+      name: monster.name,
+      level: monster.level,
+      hp: monster.hp,
+      maxHp: monster.maxHp,
+      mp: monster.mp || 0,
+      maxMp: monster.maxMp || 0,
+      baseStats: monster.baseStats || { str: 0, int: 0, vit: 0, def: 0, agi: 0 },
+      computedStats: monster.computedStats || {
         maxHp: monster.maxHp,
-        maxMp: monster.maxMp,
+        maxMp: monster.maxMp || 0,
         physicalAttack: 0,
         magicalAttack: 0,
         physicalDefense: 0,
@@ -115,6 +124,9 @@ export default function Home() {
         thunderAttack: 0,
         poisonAttack: 0,
       },
+      skills: monster.skills || [],
+      isPlayer: false,
+      isDead: monster.isDead || false,
     };
     setSelectedEntity(monsterEntity);
     setIsPlayerModal(false);
@@ -139,7 +151,7 @@ export default function Home() {
             </div>
 
             <div className="w-2/3 p-2 flex items-center">
-              <div className="w-full" onClick={handleMonsterClick}>
+              <div className="w-full">
                 <MonsterArea onMonsterClick={handleMonsterClick} />
               </div>
             </div>
