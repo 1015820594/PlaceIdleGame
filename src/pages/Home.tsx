@@ -11,7 +11,6 @@ import {
   EntityDetailModal,
 } from '@/components/GameComponents';
 import { Entity } from '@/types/game';
-import { BaseStats } from '@/types/game';
 
 export default function Home() {
   const {
@@ -62,7 +61,7 @@ export default function Home() {
   }, [isInitialized, isPaused, isGameOver, nextTurn]);
 
   const handlePlayerClick = () => {
-    const { player, tower } = useGameStore.getState();
+    const { player } = useGameStore.getState();
     const playerEntity: Entity = {
       id: 'player',
       name: player.name,
@@ -134,15 +133,21 @@ export default function Home() {
         <GameHeader />
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-1/3 flex items-center justify-center p-2 border-r border-gray-800/50">
+          <div className="w-1/3 h-full flex items-center justify-center p-2 border-r border-gray-800/50">
             <PlayerCard onClick={handlePlayerClick} />
           </div>
 
-          <div className="w-2/3 flex flex-col p-2">
-            <div className="flex-1 overflow-y-auto">
+          <div className="w-2/3 h-full flex flex-col p-2">
+            <div 
+              className="flex-1 flex flex-col justify-center overflow-hidden"
+              onClick={handleMonsterClick}
+            >
               <MonsterArea onMonsterClick={handleMonsterClick} />
             </div>
-            <CombatLog />
+            
+            <div className="flex-shrink-0">
+              <CombatLog />
+            </div>
           </div>
         </div>
 

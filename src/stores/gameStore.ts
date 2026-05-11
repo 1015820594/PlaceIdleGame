@@ -94,15 +94,16 @@ export const useGameStore = create<GameStore>()(
 
       loadGame: () => {
         const state = get();
-        if (state.player.hp && state.player.maxHp) return;
         const player = state.player;
-        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
+        if (!player.baseStats) return;
+        
+        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats || { str: 0, int: 0, vit: 0, def: 0, agi: 0 });
         set({
           player: {
             ...player,
-            hp: computedStats.maxHp,
+            hp: player.hp || computedStats.maxHp,
             maxHp: computedStats.maxHp,
-            mp: computedStats.maxMp,
+            mp: player.mp || computedStats.maxMp,
             maxMp: computedStats.maxMp,
           },
         });
