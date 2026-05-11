@@ -24,7 +24,7 @@ import {
 interface GameStore extends GameState {
   initializeGame: () => void;
   loadGame: () => void;
-  saveGame: () => void;
+  manualSave: () => void;
   addAttributePoint: (stat: keyof BaseStats) => void;
   addExp: (exp: number) => void;
   addGold: (gold: number) => void;
@@ -74,7 +74,7 @@ const createInitialTower = (): TowerData => ({
   lastSaveTime: Date.now(),
 });
 
-export const useGameStore = create<GameStore>()(
+const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       player: createInitialPlayer(),
@@ -87,33 +87,34 @@ export const useGameStore = create<GameStore>()(
       autoAdvanceFloor: true,
 
       initializeGame: () => {
-        const player = createInitialPlayer();
-        set({ player, combatLogs: [] });
+        const state = get();
+        if (state.player.baseStats && state.player.level > 1) {
+          const computedStats = calculateComputedStats(state.player.baseStats, state.player.bonusStats);
+          set({
+            player: {
+              ...state.player,
+              hp: computedStats.maxHp,
+              maxHp: computedStats.maxHp,
+              mp: computedStats.maxMp,
+              maxMp: computedStats.maxMp,
+            },
+            combatLogs: [{ id: generateId(), message: '欢迎回来！继续你的爬塔之旅！', type: 'system', timestamp: Date.now() }],
+          });
+        } else {
+          const player = createInitialPlayer();
+          set({ player, combatLogs: [{ id: generateId(), message: '欢迎来到江湖！开始你的爬塔之旅吧！', type: 'system', timestamp: Date.now() }] });
+        }
         get().spawnMonsters();
-        get().addCombatLog('欢迎来到江湖！开始你的爬塔之旅吧！', 'system');
       },
 
       loadGame: () => {
-        const state = get();
-        const player = state.player;
-        if (!player.baseStats) return;
-        
-        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats || { str: 0, int: 0, vit: 0, def: 0, agi: 0 });
-        set({
-          player: {
-            ...player,
-            hp: player.hp || computedStats.maxHp,
-            maxHp: computedStats.maxHp,
-            mp: player.mp || computedStats.maxMp,
-            maxMp: computedStats.maxMp,
-          },
-        });
       },
 
-      saveGame: () => {
+      manualSave: () => {
+        const { tower } = get();
         set({
           tower: {
-            ...get().tower,
+            ...tower,
             lastSaveTime: Date.now(),
           },
         });
@@ -140,6 +141,7 @@ export const useGameStore = create<GameStore>()(
             mp: Math.min(player.mp, computedStats.maxMp),
           },
         });
+        get().manualSave();
       },
 
       addExp: (exp: number) => {
@@ -166,6 +168,7 @@ export const useGameStore = create<GameStore>()(
             expToNextLevel: newExpToNextLevel,
           },
         });
+        get().manualSave();
       },
 
       addGold: (gold: number) => {
@@ -175,6 +178,7 @@ export const useGameStore = create<GameStore>()(
             gold: get().player.gold + gold,
           },
         });
+        get().manualSave();
       },
 
       spawnMonsters: () => {
@@ -346,6 +350,22 @@ export const useGameStore = create<GameStore>()(
           },
         });
         get().spawnMonsters();
+        get().manualSave();
+      },
+
+      descendFloor: () => {
+        const { tower } = get();
+        if (tower.currentFloor <= 1) return;
+        
+        const newFloor = tower.currentFloor - 1;
+        set({
+          tower: {
+            ...tower,
+            currentFloor: newFloor,
+          },
+        });
+        get().spawnMonsters();
+        get().manualSave();
       },
 
       manualAdvanceFloor: () => {
@@ -362,21 +382,7 @@ export const useGameStore = create<GameStore>()(
         });
         get().spawnMonsters();
         get().addCombatLog(`手动升层至第 ${newFloor} 层！`, 'system');
-      },
-
-      descendFloor: () => {
-        const { tower } = get();
-        if (tower.currentFloor <= 1) return;
-        
-        const newFloor = tower.currentFloor - 1;
-        set({
-          tower: {
-            ...tower,
-            currentFloor: newFloor,
-          },
-        });
-        get().spawnMonsters();
-        get().addCombatLog(`降层至第 ${newFloor} 层！`, 'system');
+        get().manualSave();
       },
 
       respawnMonsters: () => {
@@ -388,6 +394,7 @@ export const useGameStore = create<GameStore>()(
       setAutoAdvanceFloor: (value: boolean) => {
         set({ autoAdvanceFloor: value });
         get().addCombatLog(`自动升层：${value ? '开启' : '关闭'}`, 'system');
+        get().manualSave();
       },
 
       respawnPlayer: () => {
@@ -405,6 +412,7 @@ export const useGameStore = create<GameStore>()(
         });
         get().respawnMonsters();
         get().addCombatLog(`恢复满血，重新挑战第 ${tower.currentFloor} 层！`, 'system');
+        get().manualSave();
       },
 
       updateSkillCooldowns: () => {
@@ -496,3 +504,6 @@ export const useGameStore = create<GameStore>()(
     }
   )
 );
+
+export { useGameStore };
+export default useGameStore;

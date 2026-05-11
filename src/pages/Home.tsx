@@ -12,10 +12,23 @@ import {
 } from '@/components/GameComponents';
 import { Entity } from '@/types/game';
 
+let autoSaveInterval: ReturnType<typeof setInterval> | null = null;
+
+function initAutoSave() {
+  if (autoSaveInterval) return;
+  
+  autoSaveInterval = setInterval(() => {
+    const state = useGameStore.getState();
+    if (state.player && state.tower) {
+      state.manualSave();
+    }
+  }, 10000);
+}
+
 export default function Home() {
   const {
     initializeGame,
-    loadGame,
+    manualSave,
     nextTurn,
     isPaused,
     isGameOver,
@@ -31,12 +44,23 @@ export default function Home() {
   const lastTickRef = useRef<number>(0);
 
   useEffect(() => {
+    initAutoSave();
+    
+    return () => {
+      if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+        autoSaveInterval = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isInitialized) {
-      loadGame();
       initializeGame();
+      manualSave();
       setIsInitialized(true);
     }
-  }, [initializeGame, loadGame, isInitialized]);
+  }, [initializeGame, manualSave, isInitialized]);
 
   useEffect(() => {
     if (!isInitialized || isPaused || isGameOver) return;
