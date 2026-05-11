@@ -67,7 +67,7 @@ export default function Home() {
         <GameHeader />
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-1/2 flex items-center justify-center p-4 border-r border-gray-800/50">
+          <div className="w-1/3 flex items-center justify-center p-2 border-r border-gray-800/50">
             {activeTab === 'combat' ? (
               <PlayerCard />
             ) : (
@@ -75,7 +75,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="w-1/2 flex flex-col p-4">
+          <div className="w-2/3 flex flex-col p-2">
             <div className="flex-1 overflow-y-auto">
               <MonsterArea />
             </div>

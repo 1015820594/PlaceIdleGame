@@ -78,70 +78,45 @@ export const PlayerCard: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-gradient-to-t from-blue-900/30 to-transparent p-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-gray-900/80 rounded-xl p-4 border border-blue-500/30 shadow-lg shadow-blue-500/10">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl">
-              ⚔️
-            </div>
-            <div className="flex-1">
-              <div className="text-lg font-bold text-white mb-1">{player.name}</div>
-              <div className="text-sm text-gray-400">Lv.{player.level} 江湖侠士</div>
-            </div>
+    <div className="w-full max-w-xs mx-auto">
+      <div className="bg-gray-900/80 rounded-lg p-3 border border-blue-500/30">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl">
+            ⚔️
           </div>
-
-          <div className="mb-3">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-red-400">HP</span>
-              <span className="text-white">{player.hp}/{computedStats.maxHp}</span>
-            </div>
-            <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-300 ${
-                  hpPercent > 50 ? 'bg-gradient-to-r from-green-500 to-green-400' :
-                  hpPercent > 25 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
-                  'bg-gradient-to-r from-red-500 to-red-400'
-                }`}
-                style={{ width: `${hpPercent}%` }}
-              />
-            </div>
+          <div className="flex-1">
+            <div className="text-sm font-bold text-white">{player.name}</div>
+            <div className="text-xs text-gray-400">Lv.{player.level}</div>
           </div>
+        </div>
 
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-blue-400">EXP</span>
-              <span className="text-white">{player.exp}/{player.expToNextLevel}</span>
-            </div>
-            <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
-                style={{ width: `${expPercent}%` }}
-              />
-            </div>
+        <div className="mb-2">
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-red-400">HP</span>
+            <span className="text-white">{player.hp}/{computedStats.maxHp}</span>
           </div>
+          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-300 ${
+                hpPercent > 50 ? 'bg-gradient-to-r from-green-500 to-green-400' :
+                hpPercent > 25 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+                'bg-gradient-to-r from-red-500 to-red-400'
+              }`}
+              style={{ width: `${hpPercent}%` }}
+            />
+          </div>
+        </div>
 
-          <div className="mt-4 grid grid-cols-5 gap-2 text-center">
-            <div className="bg-red-500/10 rounded-lg p-2">
-              <div className="text-red-400 text-xs">力量</div>
-              <div className="text-white font-bold">{player.baseStats.str}</div>
-            </div>
-            <div className="bg-blue-500/10 rounded-lg p-2">
-              <div className="text-blue-400 text-xs">灵气</div>
-              <div className="text-white font-bold">{player.baseStats.int}</div>
-            </div>
-            <div className="bg-green-500/10 rounded-lg p-2">
-              <div className="text-green-400 text-xs">体力</div>
-              <div className="text-white font-bold">{player.baseStats.vit}</div>
-            </div>
-            <div className="bg-purple-500/10 rounded-lg p-2">
-              <div className="text-purple-400 text-xs">定力</div>
-              <div className="text-white font-bold">{player.baseStats.def}</div>
-            </div>
-            <div className="bg-yellow-500/10 rounded-lg p-2">
-              <div className="text-yellow-400 text-xs">身法</div>
-              <div className="text-white font-bold">{player.baseStats.agi}</div>
-            </div>
+        <div>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-blue-400">EXP</span>
+            <span className="text-white">{player.exp}/{player.expToNextLevel}</span>
+          </div>
+          <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300"
+              style={{ width: `${expPercent}%` }}
+            />
           </div>
         </div>
       </div>
@@ -149,52 +124,45 @@ export const PlayerCard: React.FC = () => {
   );
 };
 
-export const MonsterCard: React.FC<{ monster: any; index: number }> = ({ monster, index }) => {
+export const MonsterCard: React.FC<{ monster: any; index: number }> = ({ monster }) => {
   const hpPercent = (monster.hp / monster.maxHp) * 100;
   const isBoss = monster.name.startsWith('BOSS');
   const isElite = monster.name.startsWith('精英');
 
   return (
     <div
-      className={`rounded-lg p-2 transition-all duration-300 ${
-        isBoss ? 'bg-gradient-to-r from-red-900/50 to-red-800/30 border border-red-500/50' :
-        isElite ? 'bg-gradient-to-r from-orange-900/50 to-orange-800/30 border border-orange-500/50' :
-        'bg-gray-900/80 border border-gray-700/50'
+      className={`flex items-center gap-2 px-2 py-1 rounded transition-all duration-300 ${
+        isBoss ? 'bg-red-900/40 border border-red-500/50' :
+        isElite ? 'bg-orange-900/40 border border-orange-500/50' :
+        'bg-gray-900/60 border border-gray-700/50'
       } ${monster.isDead ? 'opacity-30 grayscale' : ''}`}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${
-          isBoss ? 'bg-gradient-to-br from-red-600 to-red-800' :
-          isElite ? 'bg-gradient-to-br from-orange-600 to-orange-800' :
-          'bg-gradient-to-br from-gray-600 to-gray-700'
+      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+        isBoss ? 'bg-red-600' : isElite ? 'bg-orange-600' : 'bg-gray-600'
+      }`}>
+        {isBoss ? 'B' : isElite ? 'E' : 'M'}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className={`text-xs font-bold truncate ${
+          isBoss ? 'text-red-400' : isElite ? 'text-orange-400' : 'text-gray-300'
         }`}>
-          {isBoss ? '👹' : isElite ? '💀' : '👤'}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className={`font-bold text-xs truncate ${
-            isBoss ? 'text-red-400' : isElite ? 'text-orange-400' : 'text-gray-300'
-          }`}>
-            {monster.name}
-          </div>
-          <div className="text-xs text-gray-500">Lv.{monster.level}</div>
+          {monster.name}
         </div>
       </div>
-
-      <div>
-        <div className="flex justify-between text-xs mb-1">
-          <span className="text-gray-400">HP</span>
-          <span className="text-white">{monster.hp}/{monster.maxHp}</span>
-        </div>
-        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="flex items-center gap-2">
+        <div className="w-20 h-1.5 bg-gray-700 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-300 ${
-              hpPercent > 50 ? 'bg-gradient-to-r from-green-500 to-green-400' :
-              hpPercent > 25 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
-              'bg-gradient-to-r from-red-500 to-red-400'
+              hpPercent > 50 ? 'bg-green-500' :
+              hpPercent > 25 ? 'bg-yellow-500' :
+              'bg-red-500'
             }`}
             style={{ width: `${hpPercent}%` }}
           />
         </div>
+        <span className="text-xs text-gray-400 w-16 text-right">
+          {monster.hp}/{monster.maxHp}
+        </span>
       </div>
     </div>
   );
@@ -204,19 +172,14 @@ export const MonsterArea: React.FC = () => {
   const { monsters } = useGameStore();
 
   return (
-    <div className="space-y-3">
-      <div className="text-center mb-4">
-        <h3 className="text-lg font-bold text-red-400">敌人区域</h3>
-      </div>
-      <div className="space-y-2">
-        {[0, 1, 2, 3, 4].map(index => (
-          <MonsterCard
-            key={monsters[index]?.id || index}
-            monster={monsters[index] || { isDead: true, name: '空位', hp: 0, maxHp: 1, level: 0 }}
-            index={index}
-          />
-        ))}
-      </div>
+    <div className="space-y-2">
+      {[0, 1, 2, 3, 4].map(index => (
+        <MonsterCard
+          key={monsters[index]?.id || index}
+          monster={monsters[index] || { isDead: true, name: '空位', hp: 0, maxHp: 1, level: 0 }}
+          index={index}
+        />
+      ))}
     </div>
   );
 };
