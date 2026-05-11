@@ -94,6 +94,11 @@ const useGameStore = create<GameStore>()(
         const state = get();
         if (state.player.baseStats && state.player.level > 1) {
           const computedStats = calculateComputedStats(state.player.baseStats, state.player.bonusStats);
+          
+          const loadedSkills = state.player.skills && state.player.skills.length > 0 
+            ? state.player.skills.map((s: any) => ({ ...s, currentCooldown: 0 }))
+            : DEFAULT_SKILLS.map(s => ({ ...s, currentCooldown: 0 }));
+          
           set({
             player: {
               ...state.player,
@@ -101,6 +106,7 @@ const useGameStore = create<GameStore>()(
               maxHp: computedStats.maxHp,
               mp: computedStats.maxMp,
               maxMp: computedStats.maxMp,
+              skills: loadedSkills,
             },
             combatLogs: [{ id: generateId(), message: '欢迎回来！继续你的爬塔之旅！', type: 'system', timestamp: Date.now() }],
           });
@@ -326,14 +332,27 @@ const useGameStore = create<GameStore>()(
       },
 
       clearDeadMonsters: () => {
-        const { monsters, tower, autoAdvanceFloor } = get();
+        const { monsters, tower, autoAdvanceFloor, player } = get();
         const aliveMonsters = monsters.filter(m => !m.isDead);
 
         if (aliveMonsters.length === 0) {
+          const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
+          
+          set({
+            player: {
+              ...player,
+              hp: computedStats.maxHp,
+              maxHp: computedStats.maxHp,
+              mp: computedStats.maxMp,
+              maxMp: computedStats.maxMp,
+              skills: player.skills.map(s => ({ ...s, currentCooldown: 0 })),
+            },
+          });
+
           const reward = calculateFloorReward(tower.currentFloor);
           get().addGold(reward.gold);
           get().addExp(reward.exp);
-          get().addCombatLog(`通关第 ${tower.currentFloor} 层！获得 ${reward.gold} 金币，${reward.exp} 经验！`, 'system');
+          get().addCombatLog(`通关第 ${tower.currentFloor} 层！获得 ${reward.gold} 金币，${reward.exp} 经验！满血满蓝恢复！`, 'system');
           
           if (autoAdvanceFloor) {
             get().advanceFloor();
@@ -344,13 +363,22 @@ const useGameStore = create<GameStore>()(
       },
 
       advanceFloor: () => {
-        const { tower } = get();
-        const newFloor = tower.currentFloor + 1;
+        const { tower, player } = get();
+        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
+        
         set({
           tower: {
             ...tower,
-            currentFloor: newFloor,
-            maxFloor: Math.max(tower.maxFloor, newFloor),
+            currentFloor: tower.currentFloor + 1,
+            maxFloor: Math.max(tower.maxFloor, tower.currentFloor + 1),
+          },
+          player: {
+            ...player,
+            hp: computedStats.maxHp,
+            maxHp: computedStats.maxHp,
+            mp: computedStats.maxMp,
+            maxMp: computedStats.maxMp,
+            skills: player.skills.map(s => ({ ...s, currentCooldown: 0 })),
           },
         });
         get().spawnMonsters();
@@ -358,14 +386,23 @@ const useGameStore = create<GameStore>()(
       },
 
       descendFloor: () => {
-        const { tower } = get();
+        const { tower, player } = get();
         if (tower.currentFloor <= 1) return;
         
-        const newFloor = tower.currentFloor - 1;
+        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
+        
         set({
           tower: {
             ...tower,
-            currentFloor: newFloor,
+            currentFloor: tower.currentFloor - 1,
+          },
+          player: {
+            ...player,
+            hp: computedStats.maxHp,
+            maxHp: computedStats.maxHp,
+            mp: computedStats.maxMp,
+            maxMp: computedStats.maxMp,
+            skills: player.skills.map(s => ({ ...s, currentCooldown: 0 })),
           },
         });
         get().spawnMonsters();
@@ -373,19 +410,28 @@ const useGameStore = create<GameStore>()(
       },
 
       manualAdvanceFloor: () => {
-        const { tower, autoAdvanceFloor } = get();
+        const { tower, autoAdvanceFloor, player } = get();
         if (autoAdvanceFloor) return;
         
-        const newFloor = tower.currentFloor + 1;
+        const computedStats = calculateComputedStats(player.baseStats, player.bonusStats);
+        
         set({
           tower: {
             ...tower,
-            currentFloor: newFloor,
-            maxFloor: Math.max(tower.maxFloor, newFloor),
+            currentFloor: tower.currentFloor + 1,
+            maxFloor: Math.max(tower.maxFloor, tower.currentFloor + 1),
+          },
+          player: {
+            ...player,
+            hp: computedStats.maxHp,
+            maxHp: computedStats.maxHp,
+            mp: computedStats.maxMp,
+            maxMp: computedStats.maxMp,
+            skills: player.skills.map(s => ({ ...s, currentCooldown: 0 })),
           },
         });
         get().spawnMonsters();
-        get().addCombatLog(`手动升层至第 ${newFloor} 层！`, 'system');
+        get().addCombatLog(`手动升层至第 ${tower.currentFloor + 1} 层！满血满蓝恢复！`, 'system');
         get().manualSave();
       },
 
@@ -432,7 +478,11 @@ const useGameStore = create<GameStore>()(
         const { player, monsters } = get();
         const skill = player.skills.find(s => s.id === skillId);
 
-        if (!skill || skill.currentCooldown > 0) return;
+        if (!skill) return;
+        if (skill.currentCooldown > 0) {
+          console.log('技能冷却中:', skill.name, skill.currentCooldown);
+          return;
+        }
 
         const aliveMonsters = monsters.filter(m => !m.isDead);
         if (aliveMonsters.length === 0) return;
@@ -460,6 +510,8 @@ const useGameStore = create<GameStore>()(
             },
           });
           get().addCombatLog(`${player.name} 使用了 ${skill.name}！恢复了 ${healAmount} 点生命！`, 'player');
+        } else if (skill.type === 'defense') {
+          get().addCombatLog(`${player.name} 使用了 ${skill.name}！3秒内减伤50%！`, 'player');
         }
 
         const updatedSkills = player.skills.map(s => {
